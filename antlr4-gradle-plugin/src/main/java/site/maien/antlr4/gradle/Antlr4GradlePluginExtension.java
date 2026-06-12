@@ -6,7 +6,7 @@ import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 
 public interface Antlr4GradlePluginExtension {
-    ConfigurableFileCollection getGrammarSourceRoots();
+    DirectoryProperty getGrammarSourceRoot();
     ConfigurableFileCollection getSourceFiles();
     DirectoryProperty getOutputDirectory();
     Property<Boolean> getGenerateVisitor();

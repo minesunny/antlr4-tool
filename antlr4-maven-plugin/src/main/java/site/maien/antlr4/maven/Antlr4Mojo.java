@@ -11,7 +11,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import site.maien.antlr4.core.Antlr4Config;
 import site.maien.antlr4.core.CompilationResult;
-import site.maien.antlr4.core.DefaultAntlr4Compiler;
+import site.maien.antlr4.core.Antlr4Tool;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class Antlr4Mojo extends AbstractMojo {
     private MavenProjectHelper projectHelper;
 
     @Parameter
-    private List<File> grammarSourceRoots;
+    private File grammarSourceRoot;
 
     @Parameter
     private List<File> sourceFiles;
@@ -53,13 +53,8 @@ public class Antlr4Mojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         Antlr4Config config = new Antlr4Config();
 
-        List<File> roots = new ArrayList<>();
-        if (grammarSourceRoots != null && !grammarSourceRoots.isEmpty()) {
-            roots.addAll(grammarSourceRoots);
-        } else {
-            roots.add(new File(project.getBasedir(), "src/main/antlr4"));
-        }
-        config.setGrammarSourceRoots(roots);
+        File root = grammarSourceRoot != null ? grammarSourceRoot : new File(project.getBasedir(), "src/main/antlr4");
+        config.setGrammarSourceRoot(root);
 
         List<File> sources = new ArrayList<>();
         if (sourceFiles != null) {
@@ -75,7 +70,7 @@ public class Antlr4Mojo extends AbstractMojo {
 
         getLog().info("Compiling ANTLR4 grammars...");
 
-        DefaultAntlr4Compiler compiler = new DefaultAntlr4Compiler();
+        Antlr4Tool compiler = new Antlr4Tool(config.getOutputDirectory());
         CompilationResult result = compiler.compile(config);
 
         if (!result.isSuccess()) {

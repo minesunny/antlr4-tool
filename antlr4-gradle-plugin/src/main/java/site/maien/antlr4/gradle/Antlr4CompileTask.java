@@ -8,7 +8,7 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.*;
 import site.maien.antlr4.core.Antlr4Config;
 import site.maien.antlr4.core.CompilationResult;
-import site.maien.antlr4.core.DefaultAntlr4Compiler;
+import site.maien.antlr4.core.Antlr4Tool;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,9 +21,8 @@ public abstract class Antlr4CompileTask extends DefaultTask {
     @PathSensitive(PathSensitivity.RELATIVE)
     public abstract ConfigurableFileCollection getSourceFiles();
 
-    @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
-    public abstract ConfigurableFileCollection getGrammarSourceRoots();
+    @InputDirectory
+    public abstract DirectoryProperty getGrammarSourceRoot();
 
     @OutputDirectory
     public abstract DirectoryProperty getOutputDirectory();
@@ -44,8 +43,7 @@ public abstract class Antlr4CompileTask extends DefaultTask {
     public void compile() {
         Antlr4Config config = new Antlr4Config();
         
-        List<File> roots = new ArrayList<>(getGrammarSourceRoots().getFiles());
-        config.setGrammarSourceRoots(roots);
+        config.setGrammarSourceRoot(getGrammarSourceRoot().get().getAsFile());
         
         List<File> sources = new ArrayList<>(getSourceFiles().getFiles());
         config.setSourceFiles(sources);
@@ -56,7 +54,7 @@ public abstract class Antlr4CompileTask extends DefaultTask {
         config.setPackageOverrides(getPackageOverrides().getOrElse(new java.util.HashMap<>()));
         config.setEncoding(getEncoding().getOrElse("UTF-8"));
         
-        DefaultAntlr4Compiler compiler = new DefaultAntlr4Compiler();
+        Antlr4Tool compiler = new Antlr4Tool(config.getOutputDirectory());
         CompilationResult result = compiler.compile(config);
         
         if (!result.isSuccess()) {

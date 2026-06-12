@@ -28,8 +28,9 @@ public class PackageResolver {
             if (overrides.containsKey(fileName)) {
                 return overrides.get(fileName);
             }
-            // Check relative paths from source roots
-            for (File root : config.getGrammarSourceRoots()) {
+            // Check relative paths from source root
+            File root = config.getGrammarSourceRoot();
+            if (root != null) {
                 String rootPath = root.getAbsolutePath();
                 if (absPath.startsWith(rootPath)) {
                     String relPath = absPath.substring(rootPath.length());
@@ -69,7 +70,8 @@ public class PackageResolver {
         }
 
         // 4. Default relative path from grammar source root fallback
-        for (File root : config.getGrammarSourceRoots()) {
+        File root = config.getGrammarSourceRoot();
+        if (root != null) {
             String rootPath = root.getAbsolutePath();
             String filePath = grammarFile.getParentFile() != null ? grammarFile.getParentFile().getAbsolutePath() : "";
             if (filePath.startsWith(rootPath)) {

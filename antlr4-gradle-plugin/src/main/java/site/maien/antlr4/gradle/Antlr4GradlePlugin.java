@@ -11,15 +11,15 @@ public class Antlr4GradlePlugin implements Plugin<Project> {
         Antlr4GradlePluginExtension extension = project.getExtensions().create("antlr4", Antlr4GradlePluginExtension.class);
 
         // Set defaults
-        extension.getGrammarSourceRoots().from(project.file("src/main/antlr4"));
+        extension.getGrammarSourceRoot().convention(project.getLayout().getProjectDirectory().dir("src/main/antlr4"));
         extension.getOutputDirectory().convention(project.getLayout().getBuildDirectory().dir("generated/sources/antlr4"));
         extension.getGenerateVisitor().convention(true);
         extension.getGenerateListener().convention(true);
         extension.getEncoding().convention("UTF-8");
 
         TaskProvider<Antlr4CompileTask> compileTask = project.getTasks().register("compileAntlr4", Antlr4CompileTask.class, task -> {
-            task.getGrammarSourceRoots().from(extension.getGrammarSourceRoots());
-            task.getSourceFiles().from(extension.getSourceFiles().isEmpty() ? extension.getGrammarSourceRoots() : extension.getSourceFiles());
+            task.getGrammarSourceRoot().set(extension.getGrammarSourceRoot());
+            task.getSourceFiles().from(extension.getSourceFiles());
             task.getOutputDirectory().set(extension.getOutputDirectory());
             task.getGenerateVisitor().set(extension.getGenerateVisitor());
             task.getGenerateListener().set(extension.getGenerateListener());

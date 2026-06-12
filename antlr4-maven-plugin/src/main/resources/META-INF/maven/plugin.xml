@@ -35,11 +35,11 @@
           <description>The Maven project helper.</description>
         </parameter>
         <parameter>
-          <name>grammarSourceRoots</name>
-          <type>java.util.List</type>
+          <name>grammarSourceRoot</name>
+          <type>java.io.File</type>
           <required>false</required>
           <editable>true</editable>
-          <description>Grammar source roots.</description>
+          <description>Grammar source root.</description>
         </parameter>
         <parameter>
           <name>sourceFiles</name>

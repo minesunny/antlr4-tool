@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Antlr4Config {
-    private List<File> grammarSourceRoots = new ArrayList<>();
+    private File grammarSourceRoot;
     private List<File> sourceFiles = new ArrayList<>();
     private File outputDirectory;
     private boolean generateVisitor = true;
@@ -16,12 +16,12 @@ public class Antlr4Config {
     private String encoding = "UTF-8";
     private boolean forceUpdate = false;
 
-    public List<File> getGrammarSourceRoots() {
-        return grammarSourceRoots;
+    public File getGrammarSourceRoot() {
+        return grammarSourceRoot;
     }
 
-    public void setGrammarSourceRoots(List<File> grammarSourceRoots) {
-        this.grammarSourceRoots = grammarSourceRoots;
+    public void setGrammarSourceRoot(File grammarSourceRoot) {
+        this.grammarSourceRoot = grammarSourceRoot;
     }
 
     public List<File> getSourceFiles() {

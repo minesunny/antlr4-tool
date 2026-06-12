@@ -8,12 +8,11 @@ import site.maien.antlr4.core.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Antlr4CompilerTest {
+public class Antlr4ToolTest {
 
     @TempDir
     File tempDir;
@@ -38,7 +37,7 @@ public class Antlr4CompilerTest {
         Files.writeString(parserFile.toPath(), "parser grammar MyParser;\noptions { tokenVocab=MyLexer; }\nrule: ID;");
 
         config = new Antlr4Config();
-        config.setGrammarSourceRoots(Collections.singletonList(sourceRoot));
+        config.setGrammarSourceRoot(sourceRoot);
         config.setOutputDirectory(outputDir);
         config.setGenerateVisitor(true);
         config.setGenerateListener(true);
@@ -46,7 +45,7 @@ public class Antlr4CompilerTest {
 
     @Test
     public void testCompilation() {
-        DefaultAntlr4Compiler compiler = new DefaultAntlr4Compiler();
+        Antlr4Tool compiler = new Antlr4Tool(outputDir);
         CompilationResult result = compiler.compile(config);
 
         assertTrue(result.isSuccess(), "Compilation failed: " + String.join("\n", result.getErrors()));
@@ -69,8 +68,6 @@ public class Antlr4CompilerTest {
         // Check Dependency Tree
         GrammarDependencyTree tree = result.getDependencyTree();
         assertNotNull(tree);
-        // The first file in alphabetical/topological compilation targets might vary.
-        // But since MyParser depends on MyLexer, MyParser tree will contain MyLexer.
         if (tree.getGrammarFile().getName().equals("MyParser.g4")) {
             assertEquals(1, tree.getDependencies().size());
             assertEquals("MyLexer.g4", tree.getDependencies().get(0).getGrammarFile().getName());

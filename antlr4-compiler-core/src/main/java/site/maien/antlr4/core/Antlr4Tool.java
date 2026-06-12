@@ -9,9 +9,18 @@ import org.antlr.v4.tool.ANTLRMessage;
 import org.antlr.v4.tool.ANTLRToolListener;
 import org.antlr.v4.runtime.atn.ATN;
 
-public class DefaultAntlr4Compiler implements Antlr4Compiler {
+public class Antlr4Tool {
 
-    @Override
+    private final CacheManager cacheManager;
+
+    public Antlr4Tool(File outputDirectory) {
+        this.cacheManager = new CacheManager(outputDirectory);
+    }
+
+    public CacheManager getCacheManager() {
+        return cacheManager;
+    }
+
     public CompilationResult compile(Antlr4Config config) {
         List<String> allErrors = new ArrayList<>();
         List<String> allWarnings = new ArrayList<>();
@@ -23,9 +32,10 @@ public class DefaultAntlr4Compiler implements Antlr4Compiler {
         GrammarDependencyTree finalDependencyTree = null;
 
         try {
-            // 1. Scan all available grammars in the project source roots for dependency matching
+            // 1. Scan all available grammars in the project source root for dependency matching
             Map<String, File> projectGrammars = new HashMap<>();
-            for (File root : config.getGrammarSourceRoots()) {
+            File root = config.getGrammarSourceRoot();
+            if (root != null && root.exists() && root.isDirectory()) {
                 List<File> grammars = new ArrayList<>();
                 scanGrammars(root, grammars);
                 for (File f : grammars) {
@@ -49,10 +59,7 @@ public class DefaultAntlr4Compiler implements Antlr4Compiler {
             // 3. Sort topologically
             List<File> sortedGrammars = TopologicalSorter.sort(targets, projectGrammars);
 
-            // 4. Initialize CacheManager
-            CacheManager cacheManager = new CacheManager(config.getOutputDirectory());
             Map<File, File> fileToOutputDir = new HashMap<>();
-
             boolean overallSuccess = true;
 
             for (File grammarFile : sortedGrammars) {

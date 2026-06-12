@@ -30,7 +30,7 @@ public class PackageResolverTest {
         grammarFile.getParentFile().mkdirs();
 
         config = new Antlr4Config();
-        config.setGrammarSourceRoots(Collections.singletonList(grammarRoot));
+        config.setGrammarSourceRoot(grammarRoot);
     }
 
     @Test
