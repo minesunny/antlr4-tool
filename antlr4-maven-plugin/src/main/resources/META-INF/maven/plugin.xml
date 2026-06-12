@@ -1,0 +1,96 @@
+<plugin>
+  <description>ANTLR4 Maven Plugin</description>
+  <groupId>site.maien.antlr4</groupId>
+  <artifactId>antlr4-maven-plugin</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <goalPrefix>antlr4</goalPrefix>
+  <mojos>
+    <mojo>
+      <goal>compile</goal>
+      <description>Compiles ANTLR4 grammar files.</description>
+      <requiresDirectInvocation>false</requiresDirectInvocation>
+      <requiresProject>true</requiresProject>
+      <requiresReports>false</requiresReports>
+      <requiresOnline>false</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <phase>generate-sources</phase>
+      <implementation>site.maien.antlr4.maven.Antlr4Mojo</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <threadSafe>true</threadSafe>
+      <parameters>
+        <parameter>
+          <name>project</name>
+          <type>org.apache.maven.project.MavenProject</type>
+          <required>true</required>
+          <editable>false</editable>
+          <description>The Maven project.</description>
+        </parameter>
+        <parameter>
+          <name>projectHelper</name>
+          <type>org.apache.maven.project.MavenProjectHelper</type>
+          <required>true</required>
+          <editable>false</editable>
+          <description>The Maven project helper.</description>
+        </parameter>
+        <parameter>
+          <name>grammarSourceRoots</name>
+          <type>java.util.List</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Grammar source roots.</description>
+        </parameter>
+        <parameter>
+          <name>sourceFiles</name>
+          <type>java.util.List</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Source files to compile.</description>
+        </parameter>
+        <parameter>
+          <name>outputDirectory</name>
+          <type>java.io.File</type>
+          <required>true</required>
+          <editable>true</editable>
+          <description>Output directory.</description>
+        </parameter>
+        <parameter>
+          <name>generateVisitor</name>
+          <type>boolean</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Generate visitor.</description>
+        </parameter>
+        <parameter>
+          <name>generateListener</name>
+          <type>boolean</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Generate listener.</description>
+        </parameter>
+        <parameter>
+          <name>packageOverrides</name>
+          <type>java.util.Map</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Package overrides.</description>
+        </parameter>
+        <parameter>
+          <name>encoding</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Encoding.</description>
+        </parameter>
+      </parameters>
+      <configuration>
+        <project default-value="${project}"/>
+        <outputDirectory default-value="${project.build.directory}/generated-sources/antlr4"/>
+        <generateVisitor default-value="true"/>
+        <generateListener default-value="true"/>
+        <encoding default-value="UTF-8"/>
+      </configuration>
+    </mojo>
+  </mojos>
+</plugin>
