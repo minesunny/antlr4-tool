@@ -45,6 +45,15 @@ public class PackageResolver {
                     if (overrides.containsKey(normRelPath)) {
                         return overrides.get(normRelPath);
                     }
+                    // Check parent directories
+                    String parentPath = normRelPath;
+                    while (parentPath.contains("/")) {
+                        int lastSlash = parentPath.lastIndexOf('/');
+                        parentPath = parentPath.substring(0, lastSlash);
+                        if (overrides.containsKey(parentPath)) {
+                            return overrides.get(parentPath);
+                        }
+                    }
                 }
             }
         }

@@ -63,4 +63,11 @@ public class PackageResolverTest {
         String pkg = PackageResolver.resolvePackageName(grammarFile, config);
         assertEquals("com.foo.bar", pkg);
     }
+
+    @Test
+    public void testDirectoryLevelOverride() {
+        config.getPackageOverrides().put("com/foo", "directory.override.pkg");
+        String pkg = PackageResolver.resolvePackageName(grammarFile, config);
+        assertEquals("directory.override.pkg", pkg);
+    }
 }

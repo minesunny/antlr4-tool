@@ -99,8 +99,15 @@ public class Antlr4Tool {
 
                     // Extract ATN programmatically
                     if (finalAtn == null) {
-                        List<String> args = buildAntlrArgs(outputDir, config, packageName, new File(outputDir, ".antlr-lib-temp"), grammarFile);
+                        File libTempDir = new File(outputDir, ".antlr-lib-temp");
+                        List<File> dependencies = new ArrayList<>();
+                        collectDependencies(depTree, dependencies);
+                        dependencies.remove(grammarFile); // remove self
+                        prepareLibTempDir(libTempDir, dependencies, fileToOutputDir);
+
+                        List<String> args = buildAntlrArgs(outputDir, config, packageName, libTempDir, grammarFile);
                         finalAtn = AtnExtractor.extractAtn(grammarFile, args.toArray(new String[0]));
+                        cleanDirectory(libTempDir);
                     }
                     continue;
                 }
@@ -162,12 +169,23 @@ public class Antlr4Tool {
                 if (outFiles != null) {
                     for (File f : outFiles) {
                         if (f.isFile()) {
-                            if (f.getName().startsWith(grammarName) || f.getName().endsWith(".tokens") || f.getName().endsWith(".interp")) {
-                                generated.add(f);
-                                if (f.getName().equals(grammarName + ".tokens")) {
-                                    tokensF = f;
-                                } else if (f.getName().equals(grammarName + "Lexer.java") || f.getName().equals(grammarName + "Lexer.py")) {
-                                    lexerF = f;
+                            String name = f.getName();
+                            if (name.startsWith(grammarName)) {
+                                String suffix = name.substring(grammarName.length());
+                                if (suffix.startsWith(".") ||
+                                    suffix.startsWith("Lexer") ||
+                                    suffix.startsWith("Parser") ||
+                                    suffix.startsWith("Listener") ||
+                                    suffix.startsWith("Visitor") ||
+                                    suffix.startsWith("BaseListener") ||
+                                    suffix.startsWith("BaseVisitor")) {
+                                    
+                                    generated.add(f);
+                                    if (name.equals(grammarName + ".tokens")) {
+                                        tokensF = f;
+                                    } else if (name.equals(grammarName + "Lexer.java") || name.equals(grammarName + "Lexer.py")) {
+                                        lexerF = f;
+                                    }
                                 }
                             }
                         }

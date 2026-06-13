@@ -57,16 +57,69 @@ public class Antlr4Mojo extends AbstractMojo {
         config.setGrammarSourceRoot(root);
 
         List<File> sources = new ArrayList<>();
-        if (sourceFiles != null) {
+        if (sourceFiles != null && !sourceFiles.isEmpty()) {
             sources.addAll(sourceFiles);
+        } else {
+            scanGrammars(root, sources);
         }
         config.setSourceFiles(sources);
 
         config.setOutputDirectory(outputDirectory);
         config.setGenerateVisitor(generateVisitor);
         config.setGenerateListener(generateListener);
-        config.setPackageOverrides(packageOverrides != null ? packageOverrides : new HashMap<>());
         config.setEncoding(encoding);
+
+        // Compute package overrides and defaults
+        Map<String, String> overrides = new HashMap<>(packageOverrides != null ? packageOverrides : new HashMap<>());
+        String defaultPkg = project != null ? project.getArtifactId() : "com.example";
+
+        for (File f : sources) {
+            String relPath = f.getAbsolutePath().substring(root.getAbsolutePath().length());
+            if (relPath.startsWith(File.separator)) {
+                relPath = relPath.substring(1);
+            }
+            String normPath = relPath.replace(File.separatorChar, '/');
+
+            // Check if there is already an override for this file
+            if (overrides.containsKey(normPath) || overrides.containsKey(f.getName())) {
+                continue;
+            }
+
+            // Check parent directories
+            boolean hasParentOverride = false;
+            String parentPath = normPath;
+            while (parentPath.contains("/")) {
+                int lastSlash = parentPath.lastIndexOf('/');
+                parentPath = parentPath.substring(0, lastSlash);
+                if (overrides.containsKey(parentPath)) {
+                    hasParentOverride = true;
+                    break;
+                }
+            }
+            if (hasParentOverride) {
+                continue;
+            }
+
+            // Resolve package name from header/sibling/relative path
+            String resolvedPkg = site.maien.antlr4.core.PackageResolver.resolvePackageName(f, config);
+            if (resolvedPkg == null || resolvedPkg.isEmpty()) {
+                // Default fallback to artifactId
+                String pkg = defaultPkg;
+                File parentFile = f.getParentFile();
+                if (parentFile != null && parentFile.getAbsolutePath().startsWith(root.getAbsolutePath())) {
+                    String relative = parentFile.getAbsolutePath().substring(root.getAbsolutePath().length());
+                    if (relative.startsWith(File.separator)) {
+                        relative = relative.substring(1);
+                    }
+                    if (!relative.isEmpty()) {
+                        pkg = defaultPkg + "." + relative.replace(File.separatorChar, '.');
+                    }
+                }
+                overrides.put(normPath, pkg);
+            }
+        }
+
+        config.setPackageOverrides(overrides);
 
         getLog().info("Compiling ANTLR4 grammars...");
 
@@ -87,6 +140,20 @@ public class Antlr4Mojo extends AbstractMojo {
         if (project != null) {
             project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
             getLog().info("Added source root: " + outputDirectory.getAbsolutePath());
+        }
+    }
+
+    private void scanGrammars(File dir, List<File> grammars) {
+        if (!dir.exists() || !dir.isDirectory()) return;
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                if (f.isDirectory()) {
+                    scanGrammars(f, grammars);
+                } else if (f.getName().endsWith(".g4")) {
+                    grammars.add(f);
+                }
+            }
         }
     }
 }

@@ -84,5 +84,15 @@ public class Antlr4ToolTest {
             }
         }
         assertTrue(cachedMsgFound, "Subsequent compilation should use caching");
+        
+        // Assert Bug 1 Fix: ATN should be successfully extracted from cache even with dependencies
+        assertNotNull(cachedResult.getAtn(), "ATN should still be extracted and valid from cache");
+
+        // Assert Bug 2 Fix: Cache entries for MyLexer should not contain MyParser generated files
+        CacheManager.CacheEntry lexerCache = compiler.getCacheManager().getEntry(lexerFile);
+        assertNotNull(lexerCache, "Lexer cache entry should exist");
+        for (String path : lexerCache.generatedFiles) {
+            assertFalse(path.contains("MyParser"), "Lexer cache entry should not contain Parser generated files: " + path);
+        }
     }
 }

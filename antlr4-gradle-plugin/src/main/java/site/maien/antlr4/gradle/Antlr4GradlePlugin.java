@@ -4,6 +4,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.Delete;
 
 public class Antlr4GradlePlugin implements Plugin<Project> {
     @Override
@@ -27,6 +28,10 @@ public class Antlr4GradlePlugin implements Plugin<Project> {
             task.getEncoding().set(extension.getEncoding());
         });
 
+        TaskProvider<Delete> cleanTask = project.getTasks().register("cleanCompileAntlr4", Delete.class, task -> {
+            task.delete(extension.getOutputDirectory());
+        });
+
         // Automatically add generated sources to java source set
         project.getPlugins().withId("java", javaPlugin -> {
             SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
@@ -36,6 +41,10 @@ public class Antlr4GradlePlugin implements Plugin<Project> {
             project.getTasks().named("compileJava", compileJavaTask -> {
                 compileJavaTask.dependsOn(compileTask);
             });
+            project.getTasks().named("clean", cleanGlobalTask -> {
+                cleanGlobalTask.dependsOn(cleanTask);
+            });
         });
     }
 }
+
